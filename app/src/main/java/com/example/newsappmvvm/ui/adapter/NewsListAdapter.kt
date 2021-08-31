@@ -9,15 +9,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.newsappmvvm.R
 import com.example.newsappmvvm.databinding.ItemNewsBinding
+import com.example.newsappmvvm.model.models.Article
 import com.example.newsappmvvm.model.models.ArticlesResponse
 
-class NewsListAdapter(val activity:Activity,val list:ArrayList<ArticlesResponse.Article>)
+class NewsListAdapter(val activity:Activity,val list:ArrayList<Article>,
+      val itemClickListener: AdapterItemClickListener)
     :RecyclerView.Adapter<NewsListAdapter.NewsDataViewHolder>() {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsDataViewHolder {
 
-        Toast.makeText(activity,"on Create Called", Toast.LENGTH_LONG).show()
 
         val layoutInflater = LayoutInflater.from(parent.context)
         val view = DataBindingUtil.inflate<ItemNewsBinding>(layoutInflater, R.layout.item_news,
@@ -38,10 +39,13 @@ class NewsListAdapter(val activity:Activity,val list:ArrayList<ArticlesResponse.
             holder.binding.textViewTitle.text= it.title
             holder.binding.textViewSubtitle.text = it.content
             Glide.with(activity).load(it.urlToImage)
-                .placeholder(R.drawable.news)
+                .placeholder(R.drawable.news_grey_256)
                 .into(holder.binding.imgNews)
         }
 
+        holder.itemView.setOnClickListener {
+            itemClickListener.onHeadlineItemClicked(item)
+        }
     }
 
 

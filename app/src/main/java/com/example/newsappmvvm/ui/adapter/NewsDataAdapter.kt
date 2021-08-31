@@ -11,10 +11,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.newsappmvvm.R
 import com.example.newsappmvvm.databinding.ItemNewsBinding
+import com.example.newsappmvvm.model.models.Article
 import com.example.newsappmvvm.model.models.ArticlesResponse
 
-class NewsDataAdapter(val activity:Activity):
-    PagingDataAdapter<ArticlesResponse.Article,NewsDataAdapter.NewsDataViewHolder>(diff) {
+class NewsDataAdapter(val activity:Activity,val itemClickListener: AdapterItemClickListener):
+    PagingDataAdapter<Article,NewsDataAdapter.NewsDataViewHolder>(diff) {
 
 
 
@@ -42,6 +43,9 @@ class NewsDataAdapter(val activity:Activity):
                 .centerInside()
                 .into(holder.binding.imgNews)
         }
+        holder.itemView.setOnClickListener{
+           itemClickListener.onHeadlineItemClicked(item as Article)
+        }
 
     }
 
@@ -53,17 +57,17 @@ class NewsDataAdapter(val activity:Activity):
     }
 
 
-     object diff : DiffUtil.ItemCallback<ArticlesResponse.Article>() {
+     object diff : DiffUtil.ItemCallback<Article>() {
         override fun areItemsTheSame(
-            oldItem: ArticlesResponse.Article,
-            newItem: ArticlesResponse.Article
+            oldItem: Article,
+            newItem: Article
         ): Boolean {
             return oldItem.urlToImage==newItem.urlToImage
         }
 
         override fun areContentsTheSame(
-            oldItem: ArticlesResponse.Article,
-            newItem: ArticlesResponse.Article
+            oldItem: Article,
+            newItem: Article
         ): Boolean {
             return oldItem == newItem
         }

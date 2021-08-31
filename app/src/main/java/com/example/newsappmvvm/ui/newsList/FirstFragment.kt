@@ -5,15 +5,23 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.newsappmvvm.R
+import com.example.newsappmvvm.SecondFragment
+import com.example.newsappmvvm.common.Constants
 import com.example.newsappmvvm.databinding.FragmentFirstBinding
+import com.example.newsappmvvm.model.models.Article
+import com.example.newsappmvvm.ui.adapter.AdapterItemClickListener
 import com.example.newsappmvvm.ui.adapter.NewsDataAdapter
 import com.example.newsappmvvm.ui.adapter.NewsListAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -23,11 +31,10 @@ import dagger.hilt.android.AndroidEntryPoint
  */
 
 @AndroidEntryPoint
-class FirstFragment : Fragment() {
+class FirstFragment : Fragment(), AdapterItemClickListener {
 
 
-    var binding:FragmentFirstBinding?=null
-
+    var binding: FragmentFirstBinding? = null
 
 
     override fun onCreateView(
@@ -35,8 +42,10 @@ class FirstFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        binding =DataBindingUtil.inflate<FragmentFirstBinding>(inflater, R.layout.fragment_first,
-        container,false)
+        binding = DataBindingUtil.inflate<FragmentFirstBinding>(
+            inflater, R.layout.fragment_first,
+            container, false
+        )
         return binding!!.root
 
     }
@@ -45,27 +54,30 @@ class FirstFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //recyclerview initialization
         val recyclerView = binding!!.recyclerviewNews
         recyclerView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(requireActivity())
         }
-        val adapter = NewsDataAdapter(requireActivity())
-        recyclerView.adapter=adapter
-       val viewModel = ViewModelProvider(requireActivity()).get(NewsListViewModel::class.java)
+        val newsDataAdapter = NewsDataAdapter(requireActivity(), this)
+        recyclerView.adapter = newsDataAdapter
 
-       viewModel.newsData.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
 
-               adapter.submitData(viewLifecycleOwner.lifecycle, it)
+        // viewmodel initialization
+        val viewModel = ViewModelProvider(requireActivity()).get(NewsListViewModel::class.java)
 
-       })
+        viewModel.newsData.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
 
-        adapter.addLoadStateListener { loadState->
+            newsDataAdapter.submitData(viewLifecycleOwner.lifecycle, it)
 
-            if(loadState.refresh is LoadState.Loading){
+        })
+
+        newsDataAdapter.addLoadStateListener { loadState ->
+
+            if (loadState.refresh is LoadState.Loading) {
                 binding?.progressBar?.visibility = View.VISIBLE
-            }
-            else{
+            } else {
                 val error = when {
                     loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
                     loadState.append is LoadState.Error -> loadState.append as LoadState.Error
@@ -73,29 +85,75 @@ class FirstFragment : Fragment() {
                     else -> null
                 }
                 error?.let {
-                    Toast.makeText(requireContext(), it.error.message, Toast.LENGTH_LONG).show()
+
+                    showErrorNetworkState(viewModel, newsDataAdapter, it.error.message)
+
                 }
 
-                binding?.progressBar?.visibility=View.GONE
+                if (error == null) {
+                    hideInternetErrorView()
+                }
+
+                binding?.progressBar?.visibility = View.GONE
             }
+
 
         }
 
-
-
-
-
-//        viewModel.headLines.observe(viewLifecycleOwner, Observer {
-//            val adapter = NewsListAdapter.
-//        })
-
-//        binding.buttonFirst?.setOnClickListener {
-//            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
-//        }
     }
 
-    fun showErrorView(){
+    /** Shows network error state
+     *  and fetches data from cache if internet not available
+     */
+    private fun showErrorNetworkState(
+        viewModel: NewsListViewModel, newsDataAdapter: NewsDataAdapter,
+        errorMessage: String?
+    ) {
+        viewModel.fetchNewsFromDb()
+        viewModel.newsFromDb.observe(viewLifecycleOwner, Observer {
+            if (it != null && it.isNotEmpty()) {
+                val adapter = NewsListAdapter(
+                    requireActivity(), it as ArrayList<Article>,
+                    this
+                )
+                binding?.recyclerviewNews?.adapter = adapter
+                hideInternetErrorView()
 
+            }
+        })
+
+        showErrorView(viewModel, newsDataAdapter)
+    }
+
+
+    /** Adapter item click handle - Open detail fragment */
+    override fun onHeadlineItemClicked(article: Article) {
+        val bundle = Bundle()
+        bundle.putParcelable(Constants.BUNDLE_ARTICLE, article)
+        findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment, bundle)
+
+    }
+
+    private fun hideInternetErrorView() {
+        val viewOffline = binding?.rootLayout?.findViewById<View>(R.id.view_offline)
+        viewOffline?.visibility = View.GONE
+    }
+
+    /** Show internet error view */
+    private fun showErrorView(viewModel: NewsListViewModel, adapter: NewsDataAdapter) {
+        val viewOffline = binding?.rootLayout?.findViewById<View>(R.id.view_offline)
+        viewOffline?.setOnClickListener {
+            viewModel.fetchNews()
+        }
+        var retryButton: Button? = null
+        viewOffline?.let {
+            it.visibility = View.VISIBLE
+            retryButton = it.findViewById<Button>(R.id.button_retry)
+
+        }
+        retryButton?.setOnClickListener {
+            adapter.retry()
+        }
     }
 
     override fun onDestroyView() {

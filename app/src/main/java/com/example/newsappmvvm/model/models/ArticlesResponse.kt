@@ -1,8 +1,5 @@
 package com.example.newsappmvvm.model.models
 
-data class ArticlesResponse(val articles:ArrayList<Article>){
+import androidx.room.PrimaryKey
 
-    data class Article(val title:String, val description:String,
-                      val urlToImage:String,val content:String)
-
-}
+data class ArticlesResponse(val articles:ArrayList<Article>)

@@ -1,5 +1,7 @@
 package com.example.newsappmvvm
 
+import android.app.UiModeManager.MODE_NIGHT_NO
+import android.os.Build
 import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +11,8 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.databinding.DataBindingUtil
 import com.example.newsappmvvm.databinding.ActivityMainBinding
 import com.example.newsappmvvm.ui.newsList.FirstFragment
@@ -26,21 +30,35 @@ class MainActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
         setContentView(binding.root)
 
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.placeholder,FirstFragment())
-            .commit()
-
-
         setSupportActionBar(binding.toolbar)
-        binding.toolbar.title="Top Headlines"
+        supportActionBar?.setTitle(getString(R.string.top_headlines))
 
-//        val navController = findNavController(R.id.nav_host_fragment_content_main)
-//        appBarConfiguration = AppBarConfiguration(navController.graph)
-//        setupActionBarWithNavController(navController, appBarConfiguration)
+        setFABIconForCurrentMode()
 
         binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+
+            val currentMode = AppCompatDelegate.getDefaultNightMode();
+            if(Build.VERSION.SDK_INT>=29) {
+                if (currentMode == AppCompatDelegate.MODE_NIGHT_YES) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                    binding.fab.setImageResource(R.drawable.night_mode)
+                } else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                    binding.fab.setImageResource(R.drawable.day_mode)
+                }
+            }
+            else{
+                binding.fab.visibility= View.GONE
+            }
+        }
+    }
+
+    private fun setFABIconForCurrentMode(){
+        val currentMode = AppCompatDelegate.getDefaultNightMode();
+        if (currentMode == AppCompatDelegate.MODE_NIGHT_YES) {
+            binding.fab.setImageResource(R.drawable.day_mode)
+        } else {
+            binding.fab.setImageResource(R.drawable.night_mode)
         }
     }
 

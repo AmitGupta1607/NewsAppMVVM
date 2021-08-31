@@ -1,6 +1,7 @@
 package com.example.newsappmvvm.di
 
 import com.example.newsappmvvm.model.NetworkConstants
+import com.example.newsappmvvm.model.db.NewsArticlesDao
 import com.example.newsappmvvm.model.repository.INewsRepository
 import com.example.newsappmvvm.model.repository.NewsRepository
 import com.example.newsappmvvm.retrofit.NewsApiService
@@ -27,7 +28,7 @@ class NetworkModule {
     }
 
     @Provides
-    fun providesNewsRepositoryModule(apiService: NewsApiService):INewsRepository{
-        return NewsRepository(apiService)
+    fun providesNewsRepositoryModule(apiService: NewsApiService,newsDao:NewsArticlesDao):INewsRepository{
+        return NewsRepository(apiService,newsDao)
     }
 }
