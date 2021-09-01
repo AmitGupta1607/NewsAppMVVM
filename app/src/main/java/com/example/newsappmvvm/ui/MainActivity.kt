@@ -1,21 +1,14 @@
-package com.example.newsappmvvm
+package com.example.newsappmvvm.ui
 
-import android.app.UiModeManager.MODE_NIGHT_NO
 import android.os.Build
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.databinding.DataBindingUtil
+import com.example.newsappmvvm.R
 import com.example.newsappmvvm.databinding.ActivityMainBinding
-import com.example.newsappmvvm.ui.newsList.FirstFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -27,7 +20,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)

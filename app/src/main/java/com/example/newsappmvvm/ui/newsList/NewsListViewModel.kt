@@ -33,7 +33,6 @@ class NewsListViewModel @Inject constructor(private val repository: INewsReposit
     fun fetchNews() {
         viewModelScope.launch(dispatcher.mainDispatcher()) {
            repository.fetchNews().cachedIn(viewModelScope).collectLatest {
-                it
                 _news.postValue(it)
             }
         }

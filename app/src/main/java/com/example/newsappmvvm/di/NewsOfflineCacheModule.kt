@@ -12,11 +12,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
-class LocalDbModule {
+class NewsOfflineCacheModule {
 
+    @Singleton
     @Provides
     fun providesRoomDb(@ApplicationContext context:Context)
              =  Room.databaseBuilder(context,NewsDatabase::class.java,
@@ -25,6 +27,7 @@ class LocalDbModule {
 
 
 
+    @Singleton
     @Provides
     fun providesDao(newsDatabase: NewsDatabase) =
         newsDatabase.newsDao();

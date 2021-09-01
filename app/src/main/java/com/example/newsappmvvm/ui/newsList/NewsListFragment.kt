@@ -1,23 +1,21 @@
 package com.example.newsappmvvm.ui.newsList
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.newsappmvvm.R
-import com.example.newsappmvvm.SecondFragment
 import com.example.newsappmvvm.common.Constants
 import com.example.newsappmvvm.databinding.FragmentFirstBinding
 import com.example.newsappmvvm.model.models.Article
@@ -31,7 +29,7 @@ import dagger.hilt.android.AndroidEntryPoint
  */
 
 @AndroidEntryPoint
-class FirstFragment : Fragment(), AdapterItemClickListener {
+class NewsListFragment : Fragment(), AdapterItemClickListener {
 
 
     var binding: FragmentFirstBinding? = null
@@ -76,36 +74,59 @@ class FirstFragment : Fragment(), AdapterItemClickListener {
         newsDataAdapter.addLoadStateListener { loadState ->
 
             if (loadState.refresh is LoadState.Loading) {
-                binding?.progressBar?.visibility = View.VISIBLE
+                setVisibilityOfProgressView(true, newsDataAdapter)
             } else {
-                val error = when {
-                    loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
-                    loadState.append is LoadState.Error -> loadState.append as LoadState.Error
-                    loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
-                    else -> null
-                }
+                val error = returnIfErrorLoadState(loadState)
+                // error state
                 error?.let {
-
-                    showErrorNetworkState(viewModel, newsDataAdapter, it.error.message)
+                    showErrorStateAndFetchCachedDataFromDb(viewModel, newsDataAdapter, it.error.message)
 
                 }
 
+                //success or empty state
                 if (error == null) {
                     hideInternetErrorView()
                 }
 
-                binding?.progressBar?.visibility = View.GONE
+                setVisibilityOfProgressView(false,newsDataAdapter)
             }
 
 
         }
 
+        handleSwipeToRefresh(newsDataAdapter)
+        Handler(Looper.getMainLooper()).postDelayed({ binding?.
+        swipeToRefreshLayout?.isRefreshing = false },
+            1000)
+
+    }
+
+    private fun returnIfErrorLoadState(loadState: CombinedLoadStates):LoadState.Error?{
+        val error = when {
+            loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
+            loadState.append is LoadState.Error -> loadState.append as LoadState.Error
+            loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
+            else -> null
+        }
+        return error
+    }
+
+
+    private fun handleSwipeToRefresh(newsDataAdapter: NewsDataAdapter) {
+        binding?.swipeToRefreshLayout?.setOnRefreshListener {
+            binding?.recyclerviewNews?.removeAllViews()
+            newsDataAdapter.refresh()
+            Handler(Looper.getMainLooper()).postDelayed({ binding?.
+            swipeToRefreshLayout?.isRefreshing = false },
+                1000)
+
+        }
     }
 
     /** Shows network error state
      *  and fetches data from cache if internet not available
      */
-    private fun showErrorNetworkState(
+    private fun showErrorStateAndFetchCachedDataFromDb(
         viewModel: NewsListViewModel, newsDataAdapter: NewsDataAdapter,
         errorMessage: String?
     ) {
@@ -119,11 +140,32 @@ class FirstFragment : Fragment(), AdapterItemClickListener {
                 binding?.recyclerviewNews?.adapter = adapter
                 hideInternetErrorView()
 
-            }
-            else{
-                showErrorView(viewModel,newsDataAdapter)
+            } else {
+                showErrorView(viewModel, newsDataAdapter)
             }
         })
+    }
+
+
+    private fun setVisibilityOfProgressView(
+        makeVisible: Boolean,
+        newsDataAdapter: NewsDataAdapter
+    ) {
+
+        val progressView = binding?.rootLayout?.findViewById<View>(R.id.layout_progress)
+        if (makeVisible) {
+            if (newsDataAdapter.itemCount > 0) {
+                binding?.progressBar?.visibility = View.VISIBLE
+            } else {
+                progressView?.visibility = View.VISIBLE
+            }
+        } else {
+            progressView?.visibility = View.GONE
+            binding?.progressBar?.visibility = View.GONE
+
+        }
+
+
     }
 
 
@@ -154,6 +196,7 @@ class FirstFragment : Fragment(), AdapterItemClickListener {
         }
         retryButton?.setOnClickListener {
             adapter.retry()
+            viewOffline?.visibility = View.GONE
         }
     }
 

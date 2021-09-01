@@ -11,6 +11,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -18,6 +19,7 @@ class NetworkModule {
 
 
 
+    @Singleton
     @Provides
     fun providesRetrofit():NewsApiService{
         return Retrofit.Builder()
@@ -27,6 +29,7 @@ class NetworkModule {
             .create(NewsApiService::class.java)
     }
 
+    @Singleton
     @Provides
     fun providesNewsRepositoryModule(apiService: NewsApiService,newsDao:NewsArticlesDao):INewsRepository{
         return NewsRepository(apiService,newsDao)
