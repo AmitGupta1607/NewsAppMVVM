@@ -9,4 +9,4 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @Entity(tableName = "article")
 data class Article(@PrimaryKey val title:String="",
-                   var urlToImage:String?="", var content:String?=""):Parcelable
+                   var urlToImage:String?="", var content:String?="",var author:String?=""):Parcelable

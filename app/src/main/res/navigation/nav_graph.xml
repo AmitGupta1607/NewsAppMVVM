@@ -9,7 +9,7 @@
         android:id="@+id/FirstFragment"
         android:name="com.example.newsappmvvm.ui.newsList.NewsListFragment"
         android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        tools:layout="@layout/fragment_news_list">
 
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"
@@ -20,9 +20,9 @@
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
-        android:name="com.example.newsappmvvm.NewsItemDetailFragment"
+        android:name="com.example.newsappmvvm.ui.newsList.NewsItemDetailFragment"
         android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
+        tools:layout="@layout/fragment_detail">
 
         <action
             android:id="@+id/action_SecondFragment_to_FirstFragment"

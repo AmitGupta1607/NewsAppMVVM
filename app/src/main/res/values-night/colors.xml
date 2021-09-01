@@ -2,4 +2,6 @@
 <resources>
     <color name="black_white">#ffffff</color>
     <color name="white_black">#000000</color>
+    <color name="content_text_color">#e0e0e0</color>
+    <color name="headline_title_color">#F4F4F4</color>
 </resources>

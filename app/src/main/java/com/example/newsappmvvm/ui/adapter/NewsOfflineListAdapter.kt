@@ -3,18 +3,16 @@ package com.example.newsappmvvm.ui.adapter
 import android.app.Activity
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.newsappmvvm.R
 import com.example.newsappmvvm.databinding.ItemNewsBinding
 import com.example.newsappmvvm.model.models.Article
-import com.example.newsappmvvm.model.models.ArticlesResponse
 
-class NewsListAdapter(val activity:Activity,val list:ArrayList<Article>,
-      val itemClickListener: AdapterItemClickListener)
-    :RecyclerView.Adapter<NewsListAdapter.NewsDataViewHolder>() {
+class NewsOfflineListAdapter(private val activity:Activity, private val list:ArrayList<Article>,
+                             private val itemClickListener: AdapterItemClickListener)
+    :RecyclerView.Adapter<NewsOfflineListAdapter.NewsDataViewHolder>() {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsDataViewHolder {
@@ -35,12 +33,15 @@ class NewsListAdapter(val activity:Activity,val list:ArrayList<Article>,
 
     override fun onBindViewHolder(holder: NewsDataViewHolder, position: Int) {
         val item = list[position]
-        item?.let {
+        item.let {
             holder.binding.textViewTitle.text= it.title
             holder.binding.textViewSubtitle.text = it.content
-            Glide.with(activity).load(it.urlToImage)
-                .placeholder(R.drawable.news_grey_256)
+            Glide.with(activity)
+                .load(it.urlToImage)
+                .error(R.drawable.offline_light)
+                .centerCrop()
                 .into(holder.binding.imgNews)
+            holder.binding.textViewAuthor.text=it.author
         }
 
         holder.itemView.setOnClickListener {

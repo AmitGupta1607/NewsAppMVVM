@@ -12,13 +12,13 @@ interface NewsArticlesDao {
     suspend fun insertNewsItem(article: Article)
 
     @Query("SELECT * FROM article")
-     fun fetchAllArticles():Flow<List<Article>>
+    fun fetchAllArticles(): Flow<List<Article>>
 
     @Query("DELETE FROM article")
     suspend fun deleteAllNewsItems()
 
     @Query("SELECT COUNT(*) FROM article")
-    suspend fun getCount():Int
+    suspend fun getCount(): Int
 
 
 }

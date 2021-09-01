@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
             if(Build.VERSION.SDK_INT>=29) {
                 if (currentMode == AppCompatDelegate.MODE_NIGHT_YES) {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                    binding.fab.setImageResource(R.drawable.night_mode)
+                    binding.fab.setImageResource(R.drawable.night_mode_white)
                 } else {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
                     binding.fab.setImageResource(R.drawable.day_mode)
@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         if (currentMode == AppCompatDelegate.MODE_NIGHT_YES) {
             binding.fab.setImageResource(R.drawable.day_mode)
         } else {
-            binding.fab.setImageResource(R.drawable.night_mode)
+            binding.fab.setImageResource(R.drawable.night_mode_white)
         }
     }
 

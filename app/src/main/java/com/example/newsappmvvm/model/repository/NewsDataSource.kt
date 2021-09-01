@@ -38,6 +38,9 @@ class NewsDataSource(
                 if (item.content == null) {
                     item.content = ""
                 }
+                if(item.author==null){
+                    item.author=""
+                }
                 newsArticlesDao.insertNewsItem(item)
             }
             return LoadResult.Page(

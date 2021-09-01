@@ -17,11 +17,11 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.newsappmvvm.R
 import com.example.newsappmvvm.common.Constants
-import com.example.newsappmvvm.databinding.FragmentFirstBinding
+import com.example.newsappmvvm.databinding.FragmentNewsListBinding
 import com.example.newsappmvvm.model.models.Article
 import com.example.newsappmvvm.ui.adapter.AdapterItemClickListener
 import com.example.newsappmvvm.ui.adapter.NewsDataAdapter
-import com.example.newsappmvvm.ui.adapter.NewsListAdapter
+import com.example.newsappmvvm.ui.adapter.NewsOfflineListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -32,7 +32,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class NewsListFragment : Fragment(), AdapterItemClickListener {
 
 
-    var binding: FragmentFirstBinding? = null
+    var binding: FragmentNewsListBinding? = null
 
 
     override fun onCreateView(
@@ -40,8 +40,8 @@ class NewsListFragment : Fragment(), AdapterItemClickListener {
         savedInstanceState: Bundle?
     ): View {
 
-        binding = DataBindingUtil.inflate<FragmentFirstBinding>(
-            inflater, R.layout.fragment_first,
+        binding = DataBindingUtil.inflate<FragmentNewsListBinding>(
+            inflater, R.layout.fragment_news_list,
             container, false
         )
         return binding!!.root
@@ -95,32 +95,35 @@ class NewsListFragment : Fragment(), AdapterItemClickListener {
         }
 
         handleSwipeToRefresh(newsDataAdapter)
-        Handler(Looper.getMainLooper()).postDelayed({ binding?.
-        swipeToRefreshLayout?.isRefreshing = false },
-            1000)
+        hideSwipeToRefreshLayout()
 
     }
 
+    /** Returns error object if error encountered in in load state */
     private fun returnIfErrorLoadState(loadState: CombinedLoadStates):LoadState.Error?{
-        val error = when {
+        return when {
             loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
             loadState.append is LoadState.Error -> loadState.append as LoadState.Error
             loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
             else -> null
         }
-        return error
     }
 
 
+    /** swipe to refresh listener handle */
     private fun handleSwipeToRefresh(newsDataAdapter: NewsDataAdapter) {
         binding?.swipeToRefreshLayout?.setOnRefreshListener {
             binding?.recyclerviewNews?.removeAllViews()
             newsDataAdapter.refresh()
-            Handler(Looper.getMainLooper()).postDelayed({ binding?.
-            swipeToRefreshLayout?.isRefreshing = false },
-                1000)
+            hideSwipeToRefreshLayout()
 
         }
+    }
+
+    private fun hideSwipeToRefreshLayout(){
+        Handler(Looper.getMainLooper()).postDelayed({ binding?.
+        swipeToRefreshLayout?.isRefreshing = false },
+            1000)
     }
 
     /** Shows network error state
@@ -133,7 +136,7 @@ class NewsListFragment : Fragment(), AdapterItemClickListener {
         viewModel.fetchNewsFromDb()
         viewModel.newsFromDb.observe(viewLifecycleOwner, Observer {
             if (it != null && it.isNotEmpty()) {
-                val adapter = NewsListAdapter(
+                val adapter = NewsOfflineListAdapter(
                     requireActivity(), it as ArrayList<Article>,
                     this
                 )
@@ -147,6 +150,7 @@ class NewsListFragment : Fragment(), AdapterItemClickListener {
     }
 
 
+    /** show shimmer/progressbar for loading **/
     private fun setVisibilityOfProgressView(
         makeVisible: Boolean,
         newsDataAdapter: NewsDataAdapter
@@ -154,9 +158,11 @@ class NewsListFragment : Fragment(), AdapterItemClickListener {
 
         val progressView = binding?.rootLayout?.findViewById<View>(R.id.layout_progress)
         if (makeVisible) {
+            // if item count is there show progressbar
             if (newsDataAdapter.itemCount > 0) {
                 binding?.progressBar?.visibility = View.VISIBLE
             } else {
+                // show shimmer animation
                 progressView?.visibility = View.VISIBLE
             }
         } else {
