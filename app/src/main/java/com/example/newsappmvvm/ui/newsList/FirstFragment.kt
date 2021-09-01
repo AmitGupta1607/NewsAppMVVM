@@ -120,9 +120,10 @@ class FirstFragment : Fragment(), AdapterItemClickListener {
                 hideInternetErrorView()
 
             }
+            else{
+                showErrorView(viewModel,newsDataAdapter)
+            }
         })
-
-        showErrorView(viewModel, newsDataAdapter)
     }
 
 

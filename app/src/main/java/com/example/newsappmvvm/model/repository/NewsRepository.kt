@@ -25,7 +25,7 @@ class NewsRepository(private val apiService: NewsApiService,
     }
 
 
-    override suspend fun fetchNewsFromDb(): List<Article>{
+    override  fun fetchNewsFromDb(): Flow<List<Article>>{
         return newsDao.fetchAllArticles()
     }
 

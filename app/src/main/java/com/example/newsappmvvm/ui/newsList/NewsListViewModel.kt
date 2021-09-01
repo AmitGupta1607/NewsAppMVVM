@@ -3,6 +3,7 @@ package com.example.newsappmvvm.ui.newsList
 import androidx.lifecycle.*
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.example.common.IDispatcherProvider
 import com.example.newsappmvvm.model.models.Article
 import com.example.newsappmvvm.model.models.ArticlesResponse
 import com.example.newsappmvvm.model.repository.INewsRepository
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class NewsListViewModel @Inject constructor(val repository: INewsRepository):ViewModel() {
+class NewsListViewModel @Inject constructor(private val repository: INewsRepository,
+                                            private val dispatcher:IDispatcherProvider):ViewModel() {
 
     private val _news = MutableLiveData<PagingData<Article>>()
     private val _newsFromDb = MutableLiveData<List<Article>>()
@@ -29,17 +31,20 @@ class NewsListViewModel @Inject constructor(val repository: INewsRepository):Vie
     }
 
     fun fetchNews() {
-        viewModelScope.launch {
-            repository.fetchNews().cachedIn(viewModelScope).collectLatest {
+        viewModelScope.launch(dispatcher.mainDispatcher()) {
+           repository.fetchNews().cachedIn(viewModelScope).collectLatest {
+                it
                 _news.postValue(it)
             }
         }
     }
 
     fun fetchNewsFromDb(){
-        viewModelScope.launch(Dispatchers.IO) {
-            val list = repository.fetchNewsFromDb();
-            _newsFromDb.postValue(list)
+        viewModelScope.launch(dispatcher.ioDispatcher()) {
+            repository.fetchNewsFromDb().collectLatest {
+               _newsFromDb.postValue(it)
+            }
+
         }
     }
 

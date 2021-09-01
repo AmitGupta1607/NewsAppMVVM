@@ -10,5 +10,5 @@ import kotlinx.coroutines.flow.Flow
 interface INewsRepository{
 
      fun fetchNews():Flow<PagingData<Article>>
-     suspend fun fetchNewsFromDb():List<Article>
+     fun fetchNewsFromDb():Flow<List<Article>>
 }
